@@ -6,16 +6,16 @@
 //
 
 import Foundation
-import FeedKit
+import AlamofireRSSParser
 
-extension RSSFeedItem {
+extension RSSItem {
     
     func convertToArticle() -> Article {
-        return Article(title: title ?? "", pubDate: pubDate!, link: link ?? "Link isn't available",source: source?.value ?? "")
+        return Article(title: title ?? "", pubDate: pubDate!, link: link ?? "Link isn't available",source: source ?? "")
     }
 }
 
-extension Array where Element == RSSFeedItem {
+extension Array where Element == RSSItem {
     
     func convertToArticleArray() -> [Article] {
         return map({$0.convertToArticle()})

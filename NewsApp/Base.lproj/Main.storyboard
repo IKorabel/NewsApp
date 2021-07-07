@@ -72,13 +72,16 @@
                             </tableViewCell>
                         </prototypes>
                         <connections>
-                            <outlet property="dataSource" destination="wYw-Rh-mOT" id="lzX-B7-dX0"/>
-                            <outlet property="delegate" destination="wYw-Rh-mOT" id="BCH-0z-CtX"/>
+                            <outlet property="dataSource" destination="wYw-Rh-mOT" id="XIo-hz-EtP"/>
+                            <outlet property="delegate" destination="wYw-Rh-mOT" id="nyi-tJ-PjG"/>
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="News" id="8mF-Qc-gaw">
-                        <barButtonItem key="rightBarButtonItem" title="Item" image="lineweight" catalog="system" id="RZ3-63-6ms"/>
+                        <barButtonItem key="rightBarButtonItem" title="English" id="CrO-Ag-KE2"/>
                     </navigationItem>
+                    <connections>
+                        <outlet property="changeLanguageBarButton" destination="CrO-Ag-KE2" id="zlu-e0-tXx"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JhV-d7-Vcf" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -119,7 +122,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="lineweight" catalog="system" width="128" height="110"/>
         <namedColor name="AccentColor">
             <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

@@ -6,12 +6,15 @@
 //
 
 import UIKit
-import FeedKit
-import SafariServices
+import RxSwift
+import RxCocoa
 
 class NewsMainController: UITableViewController {
+    @IBOutlet weak var changeLanguageBarButton: UIBarButtonItem!
     
-    var articles = [Article]()
+    private let viewModel = NewsControllerViewModel.shared
+    private let disposeBag = DisposeBag()
+    public var articles = PublishSubject<[Article]>()
     
     private var activityIndicator: UIActivityIndicatorView = {
         let activityIndicator = UIActivityIndicatorView()
@@ -21,97 +24,56 @@ class NewsMainController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NewsManager.shared.delegate = self
         updateUI()
-        getTheNews()
+        bindTableData()
+        bindArticles()
     }
     
     func updateUI() {
+        tableView.delegate = nil
+        tableView.dataSource = nil
         tableView.backgroundView = activityIndicator
     }
     
-    func getTheNews() {
-        activityIndicator.startAnimating()
-        NewsManager.shared.getTheNews()
-    }
-    
-    func openWebsiteWithArticle(indexOfArticle: Int) {
-        let articleSourceLink = articles[indexOfArticle].link
-        guard let sourceURL = URL(string: articleSourceLink) else { return }
-        let safariVC = SFSafariViewController(url: sourceURL)
-        present(safariVC, animated: true, completion: nil)
-    }
-    
-    func updateData() {
-        DispatchQueue.main.async {
-        self.tableView.reloadData()
-        self.activityIndicator.stopAnimating()
-        }
-    }
-}
+    func bindTableData() {
+        
+        changeLanguageBarButton.rx.tap.subscribe(onNext: { _ in
+        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+        }).disposed(by: disposeBag)
 
-extension NewsMainController {
-    
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        articles.bind(to: tableView.rx.items(cellIdentifier: "cell", cellType: NewsFeedTableViewCell.self)) {  (row,article,cell) in
+            cell.setArticle(article: article)
+        }.disposed(by: disposeBag)
+        
+        tableView.rx.itemSelected
+            .subscribe(onNext: { [self] indexPath in
+            guard let cell = self.tableView.cellForRow(at: indexPath) as? NewsFeedTableViewCell else { return }
+            viewModel.openWebsiteWithArticle(vc: self, link: cell.link)
+        }).disposed(by: disposeBag)
+
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        openWebsiteWithArticle(indexOfArticle: indexPath.row)
+    func bindArticles() {
+        
+        //LoadingObserver
+        viewModel
+            .loading
+            .subscribe(onNext: { [self] in $0 == true ? activityIndicator.startAnimating() : activityIndicator.stopAnimating() })
+            .disposed(by: disposeBag)
+        
+        // Articles Observer
+        viewModel
+            .articles
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.articles)
+            .disposed(by: disposeBag)
+        
+            
+        // Get the news from server
+        viewModel.getTheNews()
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return articles.count
-    }
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? NewsFeedTableViewCell else { return UITableViewCell() }
-        cell.setArticle(article: articles[indexPath.row])
-        return cell
-    }
-    
-    @objc private func refreshTableView(sender: UIRefreshControl) {
-        getTheNews()
-        sender.endRefreshing()
-    }
     
 }
 
-extension NewsMainController: NewsManagerDelegate {
-    
-    func didGetNewsWithSuccess(articles: [Article]) {
-        print("success")
-        self.articles = articles
-        updateData()
-    }
-    
-    func didGetNewsWithError(errorDescription: String, cachedArticles: [Article]?) {
-        print("Error: \(errorDescription)")
-        guard let cachedArticles = cachedArticles else {
-        print("Cache is empty")
-        return
-        }
-        self.articles = cachedArticles
-        updateData()
-    }
-}
 
-
-class NewsFeedTableViewCell: UITableViewCell {
-    @IBOutlet weak var articleTitleTextView: UITextView!
-    @IBOutlet weak var articlePublicationDateLabel: UILabel!
-    @IBOutlet weak var articleSourceLabel: UILabel!
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        articleTitleTextView.isSelectable = false
-    }
-    
-    func setArticle(article: Article) {
-        articleTitleTextView.text = article.title
-        articlePublicationDateLabel.text = article.pubDate.convertToString()
-        articleSourceLabel.text = article.source
-    }
-    
-}

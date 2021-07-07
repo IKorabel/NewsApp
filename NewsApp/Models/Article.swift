@@ -19,8 +19,11 @@ extension Array where Element == Article {
     func saveToCoreData() {
         let defaults = UserDefaults.standard
         let encoder = JSONEncoder()
-        if let encoded = try? encoder.encode(self) {
+        do {
+            let encoded = try encoder.encode(self)
             defaults.set(encoded, forKey: "SavedArticles")
+        } catch {
+            print("error: \(error.localizedDescription)")
         }
     }
     
@@ -31,11 +34,13 @@ extension Array where Element == Article {
     
     mutating func loadFromCoreData() {
         let defaults = UserDefaults.standard
-        if let savedNews = defaults.object(forKey: "SavedArticles") as? Data {
-            let decoder = JSONDecoder()
-            if let loadedNews = try? decoder.decode([Article].self, from: savedNews) {
-                self = loadedNews
-            }
+        guard let savedNews = defaults.object(forKey: "SavedArticles") as? Data else { return }
+        let decoder = JSONDecoder()
+        do {
+            let loadedNews = try decoder.decode([Article].self, from: savedNews)
+            self = loadedNews
+        } catch {
+            print("Error: \(error.localizedDescription)")
         }
     }
 }
