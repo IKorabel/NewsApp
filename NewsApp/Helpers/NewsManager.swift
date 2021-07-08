@@ -13,7 +13,7 @@ import AlamofireRSSParser
 class NewsManager {
     static let shared = NewsManager()
     
-    let defaultNewsURL = "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=n&gl=US&ceid=US:en"
+    private let defaultNewsURL = "https://news.google.com/rss?pz=1&cf=all&hl=en-US&topic=n&gl=US&ceid=US:en"
     
     func getTheNewsViaAlamofire(completion: @escaping ([Article]?) -> Void) {
         

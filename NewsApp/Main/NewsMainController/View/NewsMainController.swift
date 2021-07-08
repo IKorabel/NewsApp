@@ -25,11 +25,16 @@ class NewsMainController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateUI()
+    }
+    
+    func updateUI() {
+        setTableViewSettings()
+        activateInteractionsWithUI()
         bindTableData()
         bindArticles()
     }
     
-    func updateUI() {
+    func setTableViewSettings() {
         tableView.delegate = nil
         tableView.dataSource = nil
         tableView.backgroundView = activityIndicator
@@ -37,20 +42,24 @@ class NewsMainController: UITableViewController {
     
     func bindTableData() {
         
-        changeLanguageBarButton.rx.tap.subscribe(onNext: { _ in
-        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
-        }).disposed(by: disposeBag)
-
         articles.bind(to: tableView.rx.items(cellIdentifier: "cell", cellType: NewsFeedTableViewCell.self)) {  (row,article,cell) in
             cell.setArticle(article: article)
         }.disposed(by: disposeBag)
+        
+    }
+    
+    func activateInteractionsWithUI() {
         
         tableView.rx.itemSelected
             .subscribe(onNext: { [self] indexPath in
             guard let cell = self.tableView.cellForRow(at: indexPath) as? NewsFeedTableViewCell else { return }
             viewModel.openWebsiteWithArticle(vc: self, link: cell.link)
         }).disposed(by: disposeBag)
-
+        
+        changeLanguageBarButton.rx.tap.subscribe(onNext: { _ in
+        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+        }).disposed(by: disposeBag)
+        
     }
     
     func bindArticles() {

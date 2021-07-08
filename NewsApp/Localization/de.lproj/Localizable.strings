@@ -1,0 +1,8 @@
+/* 
+  Localizable.strings
+  NewsApp
+
+  Created by Игорь Корабельников on 07.07.2021.
+  
+*/
+"localizedNewsURL" = "https://news.google.com/rss/search?q=energy+efficiency&hl=de&gl=DE&ceid=DE:de";

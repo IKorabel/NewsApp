@@ -1,0 +1,8 @@
+/* 
+  Localizable.strings
+  NewsApp
+
+  Created by Игорь Корабельников on 07.07.2021.
+  
+*/
+"localizedNewsURL" = "https://news.google.com/rss?pz=1&cf=all&hl=ru&topic=n&gl=RU&ceid=RU:ru";
